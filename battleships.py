@@ -1,7 +1,8 @@
+
 import socket
 import errno
 import time
-from game_screen import *
+
 GAME_PORT = 6005
 # participating clients must use this port for game communication
 
@@ -77,12 +78,6 @@ def placing_ships(board):
             print('invalid input')
             
     return (x)
-
-def convertString(x):
-  for i in x:
-    x0+=str(i)
-    x0+'\n'
-  return x0
   
 #has game ended
 def game_over(count):
@@ -142,55 +137,41 @@ def game_server(after_connect):
         print_board(board1)#create another function called print opponent board to omit printing ships
         
         print('place your ships...')
-        x=place_ships()
-        x0=convertString(x)
-        #x=place_ships(board1)
-        game_socket.send(x0.encode())
-        o_ships= game_socket.recv(1024).decode()
-        o_ships=o_ships.split('\n')
-        opp_ships=[]
-        for i in o_ships:
-           for j in i:
-              x=int(j[0])
-              y=int(j[1])
-              t=x,y
-              opp_ships.append(t)
-              
-
-      while True:
-        print("waiting for opp's move")
-        
-        opp_move = game_socket.recv(1024).decode()
-        if not opp_move:
-          break
-        move=int(move[0]),int(move[1])
-        t=atk_opp(move,count2)
-        '''
-        count2=get_users_move(board1,count2,opp_move)
-        print_board(board1)'''
-        if game_over(count2):
-          break
-
-        #move=input("Enter the location for attack : ")
-        move=atk()
-        print(move)
-        game_socket.send(move.encode())
-        
-        '''count1=get_users_move(opp_board,count1,move)
-        print_board(opp_board)  '''        
-        if game_over(count1):
-          break
-
-        print('Game ended')
-
-'''
+        x=placing_ships(board1)
+        game_socket.send(x.encode())
+        opp_ships= game_socket.recv(1024).decode()
+        opp_ships=opp_ships.split('\n')
         opp_board=make_board()
         for i in opp_ships[:-1]:
           opp_board[int(i[1])][int(i[4])]="O"
               
             
         print("OPPONENT'S BOARD")
-        print_board(opp_board)'''
+        print_board(opp_board)
+
+       
+
+        while True:
+
+          print("waiting for opp's move")
+          opp_move = game_socket.recv(1024).decode()
+          if not opp_move:
+            break
+
+          count2=get_users_move(board1,count2,opp_move)
+          print_board(board1)
+          if game_over(count2):
+            break
+
+          move=input("Enter the location for attack : ")
+          print(move)
+          game_socket.send(move.encode())
+          count1=get_users_move(opp_board,count1,move)
+          print_board(opp_board)          
+          if game_over(count1):
+            break
+
+      print('Game ended')
 
 def game_client(opponent):
   with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as game_socket:
@@ -202,54 +183,41 @@ def game_client(opponent):
       board2=make_board()
       print_board(board2)
       print('place your ships...')
-      x=place_ships(board2)
-      x0=convertString(x)
-      game_socket.send(x0.encode())
-      o_ships= game_socket.recv(1024).decode()
-      o_ships=opp_ships.split('\n')
-      opp_ships=[]
-      for i in o_ships:
-        for j in i:
-            x=int(j[0])
-            y=int(j[1])
-            t=x,y
-            opp_ships.append(t)
-      '''
+      x=placing_ships(board2)
+      game_socket.send(x.encode())
+      opp_ships= game_socket.recv(1024).decode()
+      opp_ships=opp_ships.split('\n')
       opp_board=make_board()
+      
+
       for i in opp_ships[:-1]:
         opp_board[int(i[1])][int(i[4])]="O"
       print("OPPONENT'S BOARD")
       print_opponent_board(opp_board)
-      '''
+      
       while True:
         move=input("Enter the location for attack : ")
-        move=atk()
         print(move)
         game_socket.send(move.encode())
         if game_over(count2):
           break
-        '''count2=get_users_move(opp_board,count2,move)
-        print_opponent_board(opp_board)'''
+        count2=get_users_move(opp_board,count2,move)
+        print_opponent_board(opp_board)
 
         print("waiting for opp's move")
         opp_move = game_socket.recv(1024).decode()
         if not opp_move:
           break
-        move=int(move[0]),int(move[1])
-        t=atk_opp(move,count1)
-
-        if game_over(count1):
-         break
-
-
-      ''' count1=get_users_move(board2,count1,opp_move)    
-        print_board(board2)'''
-      
+        count1=get_users_move(board2,count1,opp_move)    
+        print_board(board2)
         
          #send a coordinate
         
         #update_game_state('opp', opp_move)
-        
+        if game_over(count1):
+          break
+
 
   
   print('Game ended')
+
